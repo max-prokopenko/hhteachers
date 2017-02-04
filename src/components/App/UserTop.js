@@ -99,7 +99,8 @@ class UserTop extends React.Component {
            	expanded: false,
            	commentValue: '',
            	valueTemp: null,
-           	rating: 0
+           	rating: 0,
+           	errorText: ''
 
         };
 
@@ -259,13 +260,18 @@ class UserTop extends React.Component {
 	addComment() {
 		let commentsString = "";
     	
-		this.state.ope.comments.push(this.state.commentValue);
-		for (var i = 0; i < this.state.ope.comments.length; i++) {
-       		commentsString = commentsString + this.state.ope.comments[i] + "||";
-       	}
-       	console.log(commentsString);
-        this.writeOpeData(this.state.id, this.state.ope.name, this.state.ope.rate, this.state.ope.votes, commentsString);
+    	if (this.state.commentValue == "") {
+	      	this.setState({ errorText: "Can't leave empty comment"})
+	    } else {
+	     	this.setState({ errorText: '' })
+			this.state.ope.comments.push(this.state.commentValue);
+			for (var i = 0; i < this.state.ope.comments.length; i++) {
+	       		commentsString = commentsString + this.state.ope.comments[i] + "||";
+	       	}
+	       	commentsString = commentsString.substring(0, commentsString.length - 2);
 
+	       	this.writeOpeData(this.state.id, this.state.ope.name, this.state.ope.rate, this.state.ope.votes, commentsString);
+	   	}
 	}
 	onChange(e) {
 	    this.setState({ inputValue: e.target.value });
@@ -286,7 +292,6 @@ class UserTop extends React.Component {
 
 	  handleChangeComment = (event) => {
 	    this.setState({commentValue: event.target.value});
-	    
 	  };
 
 	 
@@ -308,8 +313,9 @@ class UserTop extends React.Component {
 				      hintText="Add comment"
 				      value={this.state.commentValue}
 				      onChange={this.handleChangeComment}
-				      floatingLabelText="What you think about this teacher"
-				      style={{width: "70%"}}
+				      floatingLabelText="Your comment"
+				      style={{width: "200px"}}
+				      errorText= {this.state.errorText}
 				      floatingLabelStyle={{fontSize: '0.9em'}}
 				    />;
 		let ope = this.state.ope;
@@ -410,8 +416,10 @@ class UserTop extends React.Component {
 		             <CardText expandable={true}>
 		             <List>
 		                <Subheader>Comments</Subheader>
-		               	 {commentInput}
-					    <FlatButton label="Add" primary={true} onClick={this.addComment.bind(this)}/>
+		                <div style={{flex: 1, flexDirection: 'row'}}>
+			               	 {commentInput}
+						    <FlatButton label="Add" primary={true} onClick={this.addComment.bind(this)} style={{width: '30px'}}/>
+					   	</div>
 					   	{
 					   	this.state.ope.comments.map((comment, i) =>
 						 	<ListItem
