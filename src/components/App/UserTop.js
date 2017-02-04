@@ -373,7 +373,7 @@ class UserTop extends React.Component {
 	    	return (
 	    		<div style={center}>
 	    		
-	    		<Card expanded={this.state.expanded} onExpandChange={this.handleExpandChange} style={styleMain}>
+	    		<Card expanded={this.state.expanded} onExpandChange={this.handleExpandChange} style={styleMain} zDepth={0}>
            		 <CardText>
 	    			<AutoComplete
 			          hintText="Type teacher's name here"
