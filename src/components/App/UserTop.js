@@ -18,7 +18,7 @@ import FontIcon from 'material-ui/FontIcon';
 
 import TextField from 'material-ui/TextField';
 //Star
-import Rater from 'react-rater'
+import Rater from '../Rater'
 import './style.css';
 
 import {
@@ -178,7 +178,7 @@ class UserTop extends React.Component {
 	        
 	        this.setState({
 				edit: false,
-			    open: true,
+			   
 			});
     	}
     	
