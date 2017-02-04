@@ -10,11 +10,16 @@ import Avatar from 'material-ui/Avatar';
 import Person from 'material-ui/svg-icons/social/person';
 import Arrow from 'material-ui/svg-icons/navigation/expand-more';
 import ArrowUp from 'material-ui/svg-icons/navigation/expand-less';
+
+import Star1 from 'material-ui/svg-icons/toggle/star-border';
+import Star2 from 'material-ui/svg-icons/toggle/star';
+
 import FontIcon from 'material-ui/FontIcon';
 
 import TextField from 'material-ui/TextField';
 //Star
-import StarRatingComponent from 'react-star-rating-component';
+import Rater from 'react-rater'
+import './style.css';
 
 import {
   orange50,
@@ -92,7 +97,9 @@ class UserTop extends React.Component {
            	open: false,
            	show: false,
            	expanded: false,
-           	commentValue: ''
+           	commentValue: '',
+           	valueTemp: null,
+           	rating: 0
 
         };
 
@@ -145,30 +152,36 @@ class UserTop extends React.Component {
 		  });
 	}
     
-    onStarClick(nextValue, prevValue, name) {
+    onStarClick = () => {
     	
-    	let ope = this.state.ope;
-    	console.log(ope);
-    	let rateSum = this.state.ope.rate;
-    	let votesSum = this.state.ope.votes;
-    	let commentsString = "";
+    	if(this.state.edit) {
+    		let ope = this.state.ope;
     	
-    	ope.rate = nextValue + rateSum;
-    	ope.votes = votesSum + 1;
+	    	let rateSum = this.state.ope.rate;
+	    
+	    	let votesSum = this.state.ope.votes;
+	    	let commentsString = "";
+	    	
+	    	ope.rate = this.state.rating + rateSum;
+	    	
+	    	ope.votes = votesSum + 1;
+	    	
+
+	       	this.setState({ope: ope});
+
+	       	for (var i = 0; i < this.state.ope.comments.length; i++) {
+	       		commentsString = commentsString + this.state.ope.comments[i] + "||";
+	       	}
+
+	        this.writeOpeData(this.state.id, this.state.ope.name, this.state.ope.rate, this.state.ope.votes, commentsString);
+
+	        
+	        this.setState({
+				edit: false,
+			    open: true,
+			});
+    	}
     	
-
-       	this.setState({ope: ope});
-
-       	for (var i = 0; i < this.state.ope.comments.length; i++) {
-       		commentsString = commentsString + this.state.ope.comments[i] + "||";
-       	}
-        this.writeOpeData(this.state.id, this.state.ope.name, this.state.ope.rate, this.state.ope.votes, commentsString);
-
-        
-        this.setState({
-			edit: false,
-		    open: true,
-		});
         
         /*let opeId = this.state.id + 1;
         
@@ -229,7 +242,17 @@ class UserTop extends React.Component {
 								opeTemp.votes = snapshot.val();
 								that.setState({ope: opeTemp});
 		});*/
-		this.setState({show: true});							
+		let rateOpe = 0;
+	    if(this.state.ope.votes > 0) {
+		  	rateOpe = this.state.ope.rate / this.state.ope.votes;
+		   	rateOpe = rateOpe.toFixed(0);
+	    }
+	    	
+		this.setState({
+			show: true,
+			rating: rateOpe
+
+		});							
 	    console.log(this.state);
 	    
 	}
@@ -266,7 +289,20 @@ class UserTop extends React.Component {
 	    
 	  };
 
-
+	 
+	  handleRate = (e) => {
+	  		if(this.state.edit) {	
+		      this.setState({
+		        rating: e.rating
+		      })
+		      // lastRating is not undefined,
+		      // which means user have rated
+		      if (e.type === 'click') {
+	   		       console.log('You rated ' + e.rating)
+		      }
+		    }
+	    };
+	 
 	render() {
 		let commentInput = <TextField 
 				      hintText="Add comment"
@@ -280,8 +316,8 @@ class UserTop extends React.Component {
 		let opeId = this.state.id;
 		let styleTextField = {
 			postion: 'absolute',
-			top: this.state.show ? '5vh' : '35vh',
-			transitionDuration: '3s'
+			top: this.state.show ? '{300}' : '35vh'
+			
 		};
 	  	let style = {
 	        marginTop: '10vh',
@@ -312,7 +348,7 @@ class UserTop extends React.Component {
         marginTop: '5vh',
         marginBottom: '5vh',
         textAlign: 'center',
-        transitionDuration: '1s'
+       
     };
     const styleComment = {
         textAlign: 'left',
@@ -352,22 +388,14 @@ class UserTop extends React.Component {
 						            backgroundColor={orange50}
 						            icon={<Person />}
 						            size={250}
-						            style={style}
-						            
+						            style={style}	            
 					/>
 				            <p style={styleText}>
 							      {this.state.ope.name}
 					        </p>
-				       <div style={styleDiv}>    
-					        
-					        <StarRatingComponent 
-			                    name="rate1" 
-			                    starCount={5}
-			                    starColor={this.state.edit ? 'rgba(230,74,25,0.5)' : 'rgba(230,74,25,1)'}
-			                    value={rateOpe}
-			                    editing={this.state.edit}
-			                    onStarClick={this.onStarClick.bind(this)}
-			                />
+				       <div style={styleDiv} onClick={this.onStarClick.bind(this)}>    
+					      	
+					        <Rater rating={this.state.rating} onRate={this.handleRate.bind(this)} interactive={this.state.edit}/>
 						</div>
 					
 					<Snackbar
