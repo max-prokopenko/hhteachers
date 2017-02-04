@@ -58,8 +58,9 @@ class App extends Component {
         minHeight: '85vh',
         marginLeft: '5vw',
         marginTop: '5vh',
-        textAlign: 'center'
-
+        marginBottom: '5vh',
+        textAlign: 'center',
+        transitionDuration: '1s'
     };
     const styleComment = {
         textAlign: 'left',
@@ -69,47 +70,9 @@ class App extends Component {
     return (
       <MuiThemeProvider muiTheme={getMuiTheme(teacherBaseTheme)} >
         <div>
-          <Card expanded={this.state.expanded} onExpandChange={this.handleExpandChange} style={style}>
-            <CardText>
+          
              <UserTop />
-            </CardText>
-             <CardText expandable={true}>
-             <List>
-                <Subheader>Comments</Subheader>
-                <ListItem
-                  primaryText="Brendan Lim"
-                  style={styleComment}
-                  leftAvatar={<Avatar icon={<Person />}/>}
-                />
-                <ListItem
-                  primaryText="Eric Hoffman"
-                  style={styleComment}
-                  leftAvatar={<Avatar icon={<Person />}/>}
-                />
-                <ListItem
-                  primaryText="Grace Ng"
-                  style={styleComment}
-                  leftAvatar={<Avatar icon={<Person />}/>}
-                />
-                <ListItem
-                  primaryText="Kerem Suer"
-                  style={styleComment}
-                  leftAvatar={<Avatar icon={<Person />}/>}
-                />
-                <ListItem
-                  primaryText="Raquel Parrado"
-                  style={styleComment}
-                  leftAvatar={<Avatar icon={<Person />}/>}
-                />
-              </List>
-            </CardText>
-            <CardActions>
-            {this.state.expanded && <ArrowUp onTouchTap={this.handleReduce} />}
-            {!this.state.expanded && <Arrow onTouchTap={this.handleExpand} />}
-              
-              
-            </CardActions>
-          </Card> 
+            
           
           
         </div>

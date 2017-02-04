@@ -1,12 +1,18 @@
 import React from 'react';
 import FlatButton from 'material-ui/FlatButton';
 
+
+
+import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card';
+
 //Avatar
 import Avatar from 'material-ui/Avatar';
 import Person from 'material-ui/svg-icons/social/person';
+import Arrow from 'material-ui/svg-icons/navigation/expand-more';
+import ArrowUp from 'material-ui/svg-icons/navigation/expand-less';
 import FontIcon from 'material-ui/FontIcon';
 
-
+import TextField from 'material-ui/TextField';
 //Star
 import StarRatingComponent from 'react-star-rating-component';
 
@@ -17,6 +23,7 @@ import {
 
 import List from 'material-ui/List/List';
 import ListItem from 'material-ui/List/ListItem';
+import Subheader from 'material-ui/Subheader';
 
 import Snackbar from 'material-ui/Snackbar';
 
@@ -27,7 +34,7 @@ import { bindActionCreators } from 'redux';
 import store from '../../store'
 import { push } from 'react-router-redux'
 
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group' 
+import CSSTransitionGroup from 'react-addons-css-transition-group' 
 
 import AutoComplete from 'material-ui/AutoComplete';
 
@@ -77,11 +84,15 @@ class UserTop extends React.Component {
             ope:{
             		name: '',
             		rate: null,
-            		votes: null
+            		votes: null,
+            		comments: []
            	 	},
            	dataSource: [],
            	edit: true,
            	open: false,
+           	show: false,
+           	expanded: false,
+           	commentValue: ''
 
         };
 
@@ -124,12 +135,13 @@ class UserTop extends React.Component {
 		
     }
 
-    writeOpeData (userId, name, rate, votes) {
+    writeOpeData (userId, name, rate, votes, comments) {
 			console.log(userId + ' ' + name + ' ' + rate + ' ' + votes);
 		  firebase.database().ref('ope/' + this.state.id).set({
 		    name: name,
 		    rate: rate,
-		    votes : votes
+		    votes : votes,
+		    comments: comments 
 		  });
 	}
     
@@ -139,13 +151,18 @@ class UserTop extends React.Component {
     	console.log(ope);
     	let rateSum = this.state.ope.rate;
     	let votesSum = this.state.ope.votes;
+    	let commentsString = "";
     	
     	ope.rate = nextValue + rateSum;
     	ope.votes = votesSum + 1;
     	
 
        	this.setState({ope: ope});
-        this.writeOpeData(this.state.id, this.state.ope.name, this.state.ope.rate, this.state.ope.votes);
+
+       	for (var i = 0; i < this.state.ope.comments.length; i++) {
+       		commentsString = commentsString + this.state.ope.comments[i] + "||";
+       	}
+        this.writeOpeData(this.state.id, this.state.ope.name, this.state.ope.rate, this.state.ope.votes, commentsString);
 
         
         this.setState({
@@ -192,13 +209,17 @@ class UserTop extends React.Component {
 	    });
 
 	    let that = this;
-        let opeTemp = this.state.ope;
+       // let opeTemp = this.state.ope;
 	    
-	    let name = fb.database().ref('ope/' + this.state.id + '/name');
+	    let name = fb.database().ref('ope/' + this.state.id);
 							name.on('value', function(snapshot) {
-								opeTemp.name = snapshot.val();
+								console.log(snapshot);
+								let opeTemp = snapshot.val();
+								let comments = opeTemp.comments.split("||");
+								opeTemp.comments = comments;
+								that.setState({ope: opeTemp});
 		});
-		let rate = fb.database().ref('ope/' + this.state.id + '/rate');
+		/*let rate = fb.database().ref('ope/' + this.state.id + '/rate');
 							rate.on('value', function(snapshot) {
 								opeTemp.rate = snapshot.val();
 								that.setState({ope: opeTemp});
@@ -207,28 +228,100 @@ class UserTop extends React.Component {
 							votes.on('value', function(snapshot) {
 								opeTemp.votes = snapshot.val();
 								that.setState({ope: opeTemp});
-		});
+		});*/
+		this.setState({show: true});							
 	    console.log(this.state);
 	    
 	}
+	addComment() {
+		let commentsString = "";
+    	
+		this.state.ope.comments.push(this.state.commentValue);
+		for (var i = 0; i < this.state.ope.comments.length; i++) {
+       		commentsString = commentsString + this.state.ope.comments[i] + "||";
+       	}
+       	console.log(commentsString);
+        this.writeOpeData(this.state.id, this.state.ope.name, this.state.ope.rate, this.state.ope.votes, commentsString);
+
+	}
+	onChange(e) {
+	    this.setState({ inputValue: e.target.value });
+	    console.log(this.state.inputValue);
+	  }
+
+	handleExpandChange = (expanded) => {
+	    this.setState({expanded: expanded});
+	  };
+
+	  handleExpand = () => {
+	    this.setState({expanded: true});
+	  };
+
+	  handleReduce = () => {
+	    this.setState({expanded: false});
+	  };
+
+	  handleChangeComment = (event) => {
+	    this.setState({commentValue: event.target.value});
+	    
+	  };
+
 
 	render() {
-
+		let commentInput = <TextField 
+				      hintText="Add comment"
+				      value={this.state.commentValue}
+				      onChange={this.handleChangeComment}
+				      floatingLabelText="What you think about this teacher"
+				      style={{width: "70%"}}
+				      floatingLabelStyle={{fontSize: '0.9em'}}
+				    />;
 		let ope = this.state.ope;
 		let opeId = this.state.id;
-	  	const style = {
-	        marginTop: '10vh'
+		let styleTextField = {
+			postion: 'absolute',
+			top: this.state.show ? '5vh' : '35vh',
+			transitionDuration: '3s'
+		};
+	  	let style = {
+	        marginTop: '10vh',
+	        display: this.state.show ? 'inline-flex' : 'none',
+	        textAlign: 'center',
+	    };
+	    const center = {
+	        textAlign: 'center',
+	        flex: 1,
+	        justifyContent: 'center'
 	    };
 	    const styleText = {
 	        marginTop: '3vh',
 	        color: '#565F66',
 	        fontSize: '1.3em'
 	    };
-	    const styleDiv = {
+	    let styleDiv = {
 	        marginTop: '3vh',
 	        textAlign: 'center',
-	        fontSize: '3.5em'
+	        fontSize: '3.5em',
+	        display: this.state.show ? 'block' : 'none'
 	    };
+
+	    const styleMain = {
+        width: '90vw',
+        minHeight: '85vh',
+        marginLeft: '5vw',
+        marginTop: '5vh',
+        marginBottom: '5vh',
+        textAlign: 'center',
+        transitionDuration: '1s'
+    };
+    const styleComment = {
+        textAlign: 'left',
+        fontSize: '0.95em'
+
+    };
+    
+    
+
 
 	    const User = () => {
 	    	console.log('snapshot', this.state.propsUser);
@@ -240,15 +333,19 @@ class UserTop extends React.Component {
 	    	else {
 	    		rateOpe = 0; 
 	    	}
+	    	
 	    	return (
-	    		<div >
-
+	    		<div style={center}>
+	    		
+	    		<Card expanded={this.state.expanded} onExpandChange={this.handleExpandChange} style={styleMain}>
+           		 <CardText>
 	    			<AutoComplete
 			          hintText="Type teacher's name here"
 			          dataSource={this.state.dataSource}
 			          filter={AutoComplete.caseInsensitiveFilter}
 			          onNewRequest={this.handleNewRequest}
 			          maxSearchResults={5}
+			          style={styleTextField}
 			        />
 			    	<Avatar 
 						            color={deepOrange700}
@@ -261,19 +358,18 @@ class UserTop extends React.Component {
 				            <p style={styleText}>
 							      {this.state.ope.name}
 					        </p>
-				    	
-				    <div style={styleDiv}>    
-				        
-				        <StarRatingComponent 
-		                    name="rate1" 
-		                    starCount={5}
-		                    starColor={deepOrange700}
-		                    value={rateOpe}
-		                    editing={this.state.edit}
-		                    onStarClick={this.onStarClick.bind(this)}
-		                />
-					</div>
-
+				       <div style={styleDiv}>    
+					        
+					        <StarRatingComponent 
+			                    name="rate1" 
+			                    starCount={5}
+			                    starColor={this.state.edit ? 'rgba(230,74,25,0.5)' : 'rgba(230,74,25,1)'}
+			                    value={rateOpe}
+			                    editing={this.state.edit}
+			                    onStarClick={this.onStarClick.bind(this)}
+			                />
+						</div>
+					
 					<Snackbar
 			          open={this.state.open}
 			          message="Your rating is saved"
@@ -282,7 +378,30 @@ class UserTop extends React.Component {
 			        />  
 
 					
-					    
+					</CardText>
+		             <CardText expandable={true}>
+		             <List>
+		                <Subheader>Comments</Subheader>
+		               	 {commentInput}
+					    <FlatButton label="Add" primary={true} onClick={this.addComment.bind(this)}/>
+					   	{
+					   	this.state.ope.comments.map((comment, i) =>
+						 	<ListItem
+					                  primaryText={comment}
+					                  style={styleComment}
+					                  key={i}
+					                  leftAvatar={<Avatar icon={<Person />}/>}
+					        />)
+						}
+		              </List>
+		            </CardText>
+		            <CardActions>
+		            {this.state.expanded && <ArrowUp onTouchTap={this.handleReduce} />}
+		            {!this.state.expanded && this.state.show && <Arrow onTouchTap={this.handleExpand} />}
+              
+              
+            </CardActions>
+          </Card>   
 
 				   
 				</div>
