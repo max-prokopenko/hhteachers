@@ -156,7 +156,7 @@ class UserTop extends React.Component {
 	}
     
     onStarClick = () => {
-    	alert("click");
+    	
     	if(this.state.edit) {
     		let ope = this.state.ope;
     	
@@ -303,7 +303,7 @@ class UserTop extends React.Component {
 		let opeId = this.state.id;
 		let styleTextField = {
 			postion: 'absolute',
-			top: this.state.show ? '{300}' : '35vh'
+			top: this.state.show ? '2vh' : '25vh'
 			
 		};
 	  	let style = {
@@ -385,7 +385,7 @@ class UserTop extends React.Component {
 						            color={deepOrange700}
 						            backgroundColor={orange50}
 						            icon={<Person />}
-						            size={250}
+						            size={200}
 						            style={style}	            
 					/>
 				            <p style={styleText}>
