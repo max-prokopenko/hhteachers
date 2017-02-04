@@ -84,20 +84,7 @@ const mapDispatchToProps = (dispatch) => {
 
 class UserTop extends React.Component {
 
-	componentDidMount = () => {
-		let commentsString = "";
-    	for (var i = 0; i < this.props.comments.comments.comments.length; i++) {
-	       		
-	       		if(this.props.comments.comments.comments !== "") {
-	       			commentsString = commentsString + this.props.comments.comments.comments[i] + "||";
-	       		}
-	       	}
-	       	
-	       	commentsString = commentsString.substring(0, commentsString.length - 2);
-
-	        this.writeOpeData(this.state.id, this.state.ope.name, this.state.ope.rate, this.state.ope.votes, commentsString);
-  	}
-  
+	
 
 	constructor(props) {
         super(props);
@@ -169,7 +156,7 @@ class UserTop extends React.Component {
 	}
     
     onStarClick = () => {
-    	
+    	alert("click");
     	if(this.state.edit) {
     		let ope = this.state.ope;
     	
@@ -326,13 +313,19 @@ class UserTop extends React.Component {
 	    };
 	    const center = {
 	        textAlign: 'center',
-	        flex: 1,
-	        justifyContent: 'center'
+	        width: '100vw',
+	        height: '100vh',
+	       
+	        display: 'flex',
+	        alignItems: 'center',
+	        justifyContent: 'center',
+	        
 	    };
 	    const styleText = {
 	        marginTop: '3vh',
 	        color: '#565F66',
-	        fontSize: '1.3em'
+	        fontSize: '1.3em',
+
 	    };
 	    let styleDiv = {
 	        marginTop: '3vh',
@@ -343,7 +336,8 @@ class UserTop extends React.Component {
 
 	    const styleMain = {
         width: '90vw',
-        minHeight: '85vh',
+        minHeight: '70vh',
+        maxWidth: '400px',
         marginLeft: '5vw',
         marginTop: '5vh',
         marginBottom: '5vh',
@@ -385,6 +379,7 @@ class UserTop extends React.Component {
 			          onNewRequest={this.handleNewRequest}
 			          maxSearchResults={5}
 			          style={styleTextField}
+			          disableFocusRipple={false}
 			        />
 			    	<Avatar 
 						            color={deepOrange700}
@@ -396,9 +391,9 @@ class UserTop extends React.Component {
 				            <p style={styleText}>
 							      {this.state.ope.name}
 					        </p>
-				       <div style={styleDiv} onClick={this.onStarClick.bind(this)}>    
+				       <div style={styleDiv} >    
 					      	
-					        <Rater rating={this.state.rating} onRate={this.handleRate.bind(this)} interactive={this.state.edit}/>
+					        <Rater rating={parseInt(this.state.rating, 10)} onRate={this.handleRate.bind(this)} interactive={this.state.edit} onClick={this.onStarClick.bind(this)} />
 						</div>
 					
 					<Snackbar
@@ -408,9 +403,10 @@ class UserTop extends React.Component {
 			          
 			        />  
 
-					
+					 
 					</CardText>
 		             <CardText expandable={true}>
+
 		             <List>
 		                <Subheader>Comments</Subheader>
 		                <CommentBox />
