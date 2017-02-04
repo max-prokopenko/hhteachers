@@ -1,7 +1,7 @@
 import React from 'react';
 import FlatButton from 'material-ui/FlatButton';
 
-
+import CommentBox from './CommentBox';
 
 import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card';
 
@@ -34,7 +34,7 @@ import Snackbar from 'material-ui/Snackbar';
 
 //redux
 import { connect } from 'react-redux';
-import { userLogin } from '../../actions/userAction';
+import { fetchComments } from '../../actions/commentAction';
 import { bindActionCreators } from 'redux';
 import store from '../../store'
 import { push } from 'react-router-redux'
@@ -66,13 +66,15 @@ const style = {
 };
 
 function mapStateToProps(state) {
+
   return {
-    
-  }
+    comments: state.commentReducer
+  }				 
+
 }
 const mapDispatchToProps = (dispatch) => {
   return {
-      //userLogin: (a) => { dispatch(userLogin(a)) }
+      fetchComments: (a) => { dispatch(fetchComments(a)) }
   }
 }
 
@@ -81,6 +83,22 @@ const mapDispatchToProps = (dispatch) => {
 
 
 class UserTop extends React.Component {
+
+	componentDidMount = () => {
+		let commentsString = "";
+    	for (var i = 0; i < this.props.comments.comments.comments.length; i++) {
+	       		
+	       		if(this.props.comments.comments.comments !== "") {
+	       			commentsString = commentsString + this.props.comments.comments.comments[i] + "||";
+	       		}
+	       	}
+	       	
+	       	commentsString = commentsString.substring(0, commentsString.length - 2);
+
+	        this.writeOpeData(this.state.id, this.state.ope.name, this.state.ope.rate, this.state.ope.votes, commentsString);
+  	}
+  
+
 	constructor(props) {
         super(props);
         
@@ -97,11 +115,8 @@ class UserTop extends React.Component {
            	open: false,
            	show: false,
            	expanded: false,
-           	commentValue: '',
            	valueTemp: null,
            	rating: 0,
-           	errorText: ''
-
         };
 
         //http://hhmoodle.haaga-helia.fi/pluginfile.php/1461/user/icon/decaf/f1?rev=2665990
@@ -170,9 +185,14 @@ class UserTop extends React.Component {
 
 	       	this.setState({ope: ope});
 
-	       	for (var i = 0; i < this.state.ope.comments.length; i++) {
-	       		commentsString = commentsString + this.state.ope.comments[i] + "||";
+	       /*	for (var i = 0; i < this.props.comments.comments.comments.length; i++) {
+	       		
+	       		if(this.props.comments.comments.comments !== "") {
+	       			commentsString = commentsString + this.props.comments.comments.comments[i] + "||";
+	       		}
 	       	}
+	       	
+	       	commentsString = commentsString.substring(0, commentsString.length - 2);*/
 
 	        this.writeOpeData(this.state.id, this.state.ope.name, this.state.ope.rate, this.state.ope.votes, commentsString);
 
@@ -231,6 +251,7 @@ class UserTop extends React.Component {
 								let opeTemp = snapshot.val();
 								let comments = opeTemp.comments.split("||");
 								opeTemp.comments = comments;
+								that.props.fetchComments(comments);
 								that.setState({ope: opeTemp});
 		});
 		/*let rate = fb.database().ref('ope/' + this.state.id + '/rate');
@@ -257,26 +278,7 @@ class UserTop extends React.Component {
 	    console.log(this.state);
 	    
 	}
-	addComment() {
-		let commentsString = "";
-    	
-    	if (this.state.commentValue == "") {
-	      	this.setState({ errorText: "Can't leave empty comment"})
-	    } else {
-	     	this.setState({ errorText: '' })
-			this.state.ope.comments.push(this.state.commentValue);
-			for (var i = 0; i < this.state.ope.comments.length; i++) {
-	       		commentsString = commentsString + this.state.ope.comments[i] + "||";
-	       	}
-	       	commentsString = commentsString.substring(0, commentsString.length - 2);
-
-	       	this.writeOpeData(this.state.id, this.state.ope.name, this.state.ope.rate, this.state.ope.votes, commentsString);
-	   	}
-	}
-	onChange(e) {
-	    this.setState({ inputValue: e.target.value });
-	    console.log(this.state.inputValue);
-	  }
+	
 
 	handleExpandChange = (expanded) => {
 	    this.setState({expanded: expanded});
@@ -284,15 +286,14 @@ class UserTop extends React.Component {
 
 	  handleExpand = () => {
 	    this.setState({expanded: true});
+	    console.log(this.props);
 	  };
 
 	  handleReduce = () => {
 	    this.setState({expanded: false});
 	  };
 
-	  handleChangeComment = (event) => {
-	    this.setState({commentValue: event.target.value});
-	  };
+	  
 
 	 
 	  handleRate = (e) => {
@@ -309,16 +310,9 @@ class UserTop extends React.Component {
 	    };
 	 
 	render() {
-		let commentInput = <TextField 
-				      hintText="Add comment"
-				      value={this.state.commentValue}
-				      onChange={this.handleChangeComment}
-				      floatingLabelText="Your comment"
-				      style={{width: "200px"}}
-				      errorText= {this.state.errorText}
-				      floatingLabelStyle={{fontSize: '0.9em'}}
-				    />;
+		
 		let ope = this.state.ope;
+		
 		let opeId = this.state.id;
 		let styleTextField = {
 			postion: 'absolute',
@@ -366,7 +360,10 @@ class UserTop extends React.Component {
 
 
 	    const User = () => {
-	    	console.log('snapshot', this.state.propsUser);
+	    	console.log('snapshot', this.state);
+
+	    	
+
 	    	let rateOpe;
 	    	if(this.state.ope.votes > 0) {
 		    	rateOpe = this.state.ope.rate / this.state.ope.votes;
@@ -380,7 +377,7 @@ class UserTop extends React.Component {
 	    		<div style={center}>
 	    		
 	    		<Card expanded={this.state.expanded} onExpandChange={this.handleExpandChange} style={styleMain} zDepth={0}>
-           		 <CardText>
+           		 <CardText key="CardMain">
 	    			<AutoComplete
 			          hintText="Type teacher's name here"
 			          dataSource={this.state.dataSource}
@@ -416,19 +413,8 @@ class UserTop extends React.Component {
 		             <CardText expandable={true}>
 		             <List>
 		                <Subheader>Comments</Subheader>
-		                <div style={{flex: 1, flexDirection: 'row'}}>
-			               	 {commentInput}
-						    <FlatButton label="Add" primary={true} onClick={this.addComment.bind(this)} style={{width: '30px'}}/>
-					   	</div>
-					   	{
-					   	this.state.ope.comments.map((comment, i) =>
-						 	<ListItem
-					                  primaryText={comment}
-					                  style={styleComment}
-					                  key={i}
-					                  leftAvatar={<Avatar icon={<Person />}/>}
-					        />)
-						}
+		                <CommentBox />
+					   	
 		              </List>
 		            </CardText>
 		            <CardActions>
