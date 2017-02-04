@@ -20,7 +20,7 @@ import FontIcon from 'material-ui/FontIcon';
 
 //styles
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import teacherBaseTheme from 'material-ui/styles/baseThemes/teacherBaseTheme';
+import teacherBaseTheme from '../../teacherBaseTheme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
 
